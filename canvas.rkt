@@ -199,16 +199,20 @@
       (for/list ([i size])
         (sleep (/ (random) 20))
         (send surface add-node (label (~a i)))))
-    (for ([n ns])
-      (sleep (/ (random) 20))
-      (define m n)
-      (let loop () (when (eq? m n) (set! m (random-ref ns)) (loop)))
-      (define e (send surface add-edge n m))
-      (set-edge-c1! e (random-ref '(#f #t)))
-      (set-edge-c2! e (random-ref '(#f #t)))
-      (set-edge-c3! e (random-ref '(#f #t)))
-      (set-edge-c4! e (random-ref '(#f #t))))
-    (for ([_ (random size)])
-      (sleep (/ (random) 20))
-      (define n+m (random-sample ns 2))
-      (send surface add-edge (car n+m) (cadr n+m)))))
+    (define es
+      (append
+       (for/list ([n ns])
+         (sleep (/ (random) 20))
+         (send surface add-edge n (random-ref (remq n ns))))
+       (for/list ([_ (random size)])
+         (sleep (/ (random) 20))
+         (define n+m (random-sample ns 2))
+         (send surface add-edge (car n+m) (cadr n+m)))))
+    (simulator
+     #:rate 6
+     (λ _
+       (for ([e es])
+         (set-edge-c1! e (random-ref '(#f #t)))
+         (set-edge-c2! e (random-ref '(#f #t)))
+         (set-edge-c3! e (random-ref '(#f #t)))
+         (set-edge-c4! e (random-ref '(#f #t))))))))
