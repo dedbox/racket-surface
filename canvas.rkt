@@ -45,7 +45,7 @@
   target)
 
 (struct node (bitmap position) #:mutable)
-(struct edge (node1 node2 in1 out1 int2 out2) #:mutable)
+(struct edge (node1 node2 c1 c2 c3 c4) #:mutable)
 
 (define (v+ . vecs)
   (apply vector-map + vecs))
@@ -95,8 +95,10 @@
       n)
 
     (define/public (add-edge n m)
-      (unless (get-edge n m)
-        (set! edges (cons (edge n m 'recv 'give 'take 'emit) edges))))
+      (or (get-edge n m)
+          (let ([e (edge n m #f #f #f #f)])
+            (set! edges (cons e edges))
+            e)))
 
     (define (get-edge n m)
       (findf (λ (e)
@@ -147,37 +149,35 @@
       ;; redraw nodes and edges
       (send dc set-background deep-gray)
       (send dc clear)
-      (for ([e edges])
-        (define p1 (v+ (node-position (edge-node1 e)) #(10 10)))
-        (define p2 (v+ (node-position (edge-node2 e)) #(10 10)))
-        (send dc set-pen dark-gray 3 'solid)
-        (send dc draw-line
-              (vector-ref p1 0) (vector-ref p1 1)
-              (vector-ref p2 0) (vector-ref p2 1))
-        (define-values (p1- p2-) (voffset p1 p2 -3))
-        (define p1/2- (v+ p1- (v/ (v- p2- p1-) 2)))
-        (send dc set-pen red 3 'solid)
-        (send dc draw-line
-              (vector-ref p1- 0) (vector-ref p1- 1)
-              (vector-ref p1/2- 0) (vector-ref p1/2- 1))
-        (send dc set-pen green 3 'solid)
-        (send dc draw-line
-              (vector-ref p1/2- 0) (vector-ref p1/2- 1)
-              (vector-ref p2- 0) (vector-ref p2- 1))
-        (define-values (p1+ p2+) (voffset p1 p2 3))
-        (define p1/2+ (v+ p1+ (v/ (v- p2+ p1+) 2)))
-        (send dc set-pen purple 3 'solid)
-        (send dc draw-line
-              (vector-ref p1+ 0) (vector-ref p1+ 1)
-              (vector-ref p1/2+ 0) (vector-ref p1/2+ 1))
-        (send dc set-pen blue 3 'solid)
-        (send dc draw-line
-              (vector-ref p1/2+ 0) (vector-ref p1/2+ 1)
-              (vector-ref p2+ 0) (vector-ref p2+ 1)))
-      (for ([n nodes])
-        (define pos (node-position n))
-        (send dc draw-bitmap
-              (node-bitmap n) (vector-ref pos 0) (vector-ref pos 1))))
+      (for ([e edges]) (draw-edge dc e))
+      (for ([n nodes]) (draw-node dc n)))
+
+    (define (draw-edge dc e)
+      (define p1 (v+ (node-position (edge-node1 e)) #(10 10)))
+      (define p2 (v+ (node-position (edge-node2 e)) #(10 10)))
+      (send dc set-pen dark-gray 7 'solid)
+      (send dc draw-line
+            (vector-ref p1 0) (vector-ref p1 1)
+            (vector-ref p2 0) (vector-ref p2 1))
+      (define-values (p1- p2-) (voffset p1 p2 -3.5))
+      (define-values (p1+ p2+) (voffset p1 p2  3.5))
+      (define p1/2- (v+ p1- (v/ (v- p2- p1-) 2)))
+      (define p1/2+ (v+ p1+ (v/ (v- p2+ p1+) 2)))
+      (when (edge-c1 e) (draw-edge-corner dc red    p1-   p1/2-))
+      (when (edge-c2 e) (draw-edge-corner dc green  p1/2- p2-  ))
+      (when (edge-c3 e) (draw-edge-corner dc purple p1+   p1/2+))
+      (when (edge-c4 e) (draw-edge-corner dc blue   p1/2+ p2+  )))
+
+    (define (draw-edge-corner dc color p1 p2)
+      (send dc set-pen color 3 'solid)
+      (send dc draw-line
+            (vector-ref p1 0) (vector-ref p1 1)
+            (vector-ref p2 0) (vector-ref p2 1)))
+
+    (define (draw-node dc n)
+      (define pos (node-position n))
+      (send dc draw-bitmap
+            (node-bitmap n) (vector-ref pos 0) (vector-ref pos 1)))
 
     (define canvas (new canvas%
                         [parent parent]
@@ -203,7 +203,11 @@
       (sleep (/ (random) 20))
       (define m n)
       (let loop () (when (eq? m n) (set! m (random-ref ns)) (loop)))
-      (send surface add-edge n m))
+      (define e (send surface add-edge n m))
+      (set-edge-c1! e (random-ref '(#f #t)))
+      (set-edge-c2! e (random-ref '(#f #t)))
+      (set-edge-c3! e (random-ref '(#f #t)))
+      (set-edge-c4! e (random-ref '(#f #t))))
     (for ([_ (random size)])
       (sleep (/ (random) 20))
       (define n+m (random-sample ns 2))
