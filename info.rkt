@@ -2,11 +2,12 @@
 
 (define collection "surface")
 
-(define deps
-  '("base"))
+(define deps '("base"
+               "draw-lib"
+               "gui-lib"
+               "neuron-lib"
+               "rackunit-lib"))
 
-(define build-deps
-  '())
+(define build-deps '("scribble-lib"))
 
-(define scribblings
-  '(("scribblings/surface.scrbl")))
+(define scribblings '(("scribblings/surface.scrbl")))

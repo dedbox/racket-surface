@@ -1,7 +1,6 @@
 #lang racket/base
 
-(require fancy-app
-         racket/math
+(require racket/math
          racket/vector)
 
 (provide (all-defined-out))
@@ -13,10 +12,10 @@
   (apply vector-map - vecs))
 
 (define (v* vec . vs)
-  (vector-map (apply * _ vs) vec))
+  (vector-map (λ (v) (apply * v vs)) vec))
 
 (define (v/ vec . vs)
-  (vector-map (apply / _ vs) vec))
+  (vector-map (λ (v) (apply / v vs)) vec))
 
 (define (vnorm-squared vec)
   (for/sum ([v vec]) (* v v)))

@@ -2,14 +2,15 @@
 
 (require racket/class
          racket/draw
-         surface/colors)
+         surface/colors
+         surface/vector)
 
 (provide (all-defined-out))
 
 (struct node (bitmap position) #:mutable)
 
-(define (draw-node dc n)
-  (define pos (node-position n))
+(define (draw-node dc origin n)
+  (define pos (v+ (node-position n) origin))
   (send dc draw-bitmap
         (node-bitmap n) (vector-ref pos 0) (vector-ref pos 1)))
 
