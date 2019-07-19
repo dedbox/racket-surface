@@ -4,7 +4,7 @@
 
 From the command line:
 ```
-$ raco pkg install --clone racket-surface https://github.com/dedbox/racket-surface.git
+$ raco pkg install --clone ./surface https://github.com/dedbox/racket-surface.git
 ```
 
 # Usage
@@ -15,16 +15,18 @@ simulator for automatic layout.
 Right now, all the action is in `canvas.rkt`. Its `main` sub-module starts the
 demo. To start the simulator from the command line, run:
 ```
-$ racket canvas.rkt
+$ racket ./surface/canvas.rkt
 ```
 
 Key bindinds:
-| `<spacebar>`                         | pause / unpause |
-| `<backspace>`                        | reset           |
-| `r`                                  | randomize       |
-| `=` / `-`                            | zoom in / out   |
-| `<left>` / `<right>` / `up` / `down` | pan             |
-| `Q`                                  | quit            |
+```
+ <spacebar>                   | pause / unpause
+ <backspace>                  | reset
+ r                            | randomize
+ = / -                        | zoom in / out
+ <left> / <right> / up / down | pan
+ Q                            | quit
+```
 
-This repo is for educational and historical reference only. For future
-developments, see [https://github.com/dedbox/racket-viz].
+This repository is for educational and historical reference only. For future
+developments, see https://github.com/dedbox/racket-viz.
